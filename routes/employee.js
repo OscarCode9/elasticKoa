@@ -3,14 +3,16 @@ router.prefix('/employees')
 
 router.get('/getAllEmployees', async function getAllEmployee(ctx, next) {
 	try {
-		const { count } = await ctx.client.count()
+		const {
+			count
+		} = await ctx.client.count()
 		const response = await ctx.client.search({
 			index: 'employees',
 			body: {
 				query: {
 					match_all: {}
 				}
-			}, 
+			},
 			size: count
 		})
 		ctx.status = 200
@@ -71,7 +73,7 @@ router.delete('/deleteEmployeeById/:employeeId', async function deleteEmployeeBy
 
 router.get('/getEmployeeById/:employeeId', async function getEmployeeById(ctx, next) {
 	const employeeId = ctx.params.employeeId
-	try{
+	try {
 		const employee = await ctx.client.search({
 			index: 'employees',
 			body: {
@@ -84,7 +86,30 @@ router.get('/getEmployeeById/:employeeId', async function getEmployeeById(ctx, n
 		})
 		ctx.status = 200
 		ctx.body = employee
-	}catch(error){
+	} catch (error) {
+		ctx.throw(400, 'bad request', {
+			error
+		})
+	}
+})
+
+router.put('/updateEmployeeByUserName/:employeeId', async function updateEmployeeByUserName(ctx, next) {
+	const employee = ctx.request.body
+	const employeeId = ctx.params.employeeId
+	try {
+		const updateEmployee = await ctx.client.index({
+			index: 'employees',
+			type: 'employee',
+			id: employeeId,
+			body: employee
+		});
+		ctx.status = 201
+		ctx.body = {
+			updateEmployee,
+			employee
+		}
+
+	} catch (error) {
 		ctx.throw(400, 'bad request', {
 			error
 		})
